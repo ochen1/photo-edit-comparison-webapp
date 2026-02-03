@@ -1,9 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "preact/hooks"
 import { Button } from "./components/ui/button"
+import { GifEditor } from "./components/GifEditor"
 import { processImageFile, revokeImageUrl } from "./lib/image-utils"
-import { ImagePlus, RotateCcw } from "lucide-preact"
+import { ImagePlus, RotateCcw, Film } from "lucide-preact"
 
-type AppState = "select" | "compare"
+type AppState = "select" | "compare" | "gif"
 
 export function App() {
   const [state, setState] = useState<AppState>("select")
@@ -73,6 +74,17 @@ export function App() {
   const handlePointerUp = useCallback(() => {
     setShowOriginal(false)
   }, [])
+
+  // GIF Editor Screen
+  if (state === "gif") {
+    return (
+      <GifEditor
+        originalImage={originalImage}
+        editedImage={editedImage}
+        onBack={() => setState("compare")}
+      />
+    )
+  }
 
   // Selection Screen
   if (state === "select") {
@@ -219,23 +231,36 @@ export function App() {
       </div>
 
       {/* Instructions */}
-      <div class="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+      <div class="absolute bottom-24 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
         <p class="text-white/60 text-sm text-center">
           Hold to see original
         </p>
       </div>
 
-      {/* Reset Button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation()
-          reset()
-        }}
-        class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm transition-colors"
-      >
-        <RotateCcw class="w-4 h-4" />
-        New Comparison
-      </button>
+      {/* Bottom action buttons */}
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3">
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            reset()
+          }}
+          class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm transition-colors"
+        >
+          <RotateCcw class="w-4 h-4" />
+          New
+        </button>
+        
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setState("gif")
+          }}
+          class="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-full text-white text-sm transition-colors"
+        >
+          <Film class="w-4 h-4" />
+          Create GIF
+        </button>
+      </div>
     </div>
   )
 }
