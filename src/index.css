@@ -17,3 +17,12 @@ body {
   touch-action: manipulation;
   background-color: #000;
 }
+
+/* Prevent long-press context menu on images */
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}

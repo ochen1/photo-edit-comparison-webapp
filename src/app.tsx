@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "preact/hooks"
 import { Button } from "./components/ui/button"
 import { GifEditor } from "./components/GifEditor"
 import { processImageFile, revokeImageUrl } from "./lib/image-utils"
+import { preventImageContextMenu } from "./lib/utils"
 import { ImagePlus, RotateCcw, Film, ArrowUpDown } from "lucide-preact"
 
 type AppState = "select" | "compare" | "gif"
@@ -245,7 +246,9 @@ export function App() {
                     <img 
                       src={originalImage} 
                       class="w-20 h-20 rounded-lg object-cover border-2 border-green-500" 
-                      alt="Original" 
+                      alt="Original"
+                      onContextMenu={preventImageContextMenu}
+                      draggable={false}
                     />
                     <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
                       Original
@@ -270,7 +273,9 @@ export function App() {
                     <img 
                       src={editedImage} 
                       class="w-20 h-20 rounded-lg object-cover border-2 border-blue-500" 
-                      alt="Edited" 
+                      alt="Edited"
+                      onContextMenu={preventImageContextMenu}
+                      draggable={false}
                     />
                     <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
                       Edited
@@ -307,11 +312,13 @@ export function App() {
                 class="flex-1 flex flex-col items-center gap-2 group"
               >
                 <div class="relative">
-                  <img 
-                    src={originalImage!} 
-                    class="w-24 h-24 rounded-lg object-cover border-2 border-green-500 group-hover:opacity-75 transition-opacity" 
-                    alt="Original" 
-                  />
+                   <img 
+                     src={originalImage!} 
+                     class="w-24 h-24 rounded-lg object-cover border-2 border-green-500 group-hover:opacity-75 transition-opacity" 
+                     alt="Original"
+                     onContextMenu={preventImageContextMenu}
+                     draggable={false}
+                   />
                   <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
                     Original
                   </span>
@@ -333,11 +340,13 @@ export function App() {
                 class="flex-1 flex flex-col items-center gap-2 group"
               >
                 <div class="relative">
-                  <img 
-                    src={editedImage!} 
-                    class="w-24 h-24 rounded-lg object-cover border-2 border-blue-500 group-hover:opacity-75 transition-opacity" 
-                    alt="Edited" 
-                  />
+                   <img 
+                     src={editedImage!} 
+                     class="w-24 h-24 rounded-lg object-cover border-2 border-blue-500 group-hover:opacity-75 transition-opacity" 
+                     alt="Edited"
+                     onContextMenu={preventImageContextMenu}
+                     draggable={false}
+                   />
                   <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
                     Edited
                   </span>
@@ -394,6 +403,7 @@ export function App() {
           transition-opacity duration-150
           ${showOriginal ? "opacity-0" : "opacity-100"}
         `}
+        onContextMenu={preventImageContextMenu}
         draggable={false}
       />
 
@@ -406,6 +416,7 @@ export function App() {
           transition-opacity duration-150
           ${showOriginal ? "opacity-100" : "opacity-0"}
         `}
+        onContextMenu={preventImageContextMenu}
         draggable={false}
       />
 
