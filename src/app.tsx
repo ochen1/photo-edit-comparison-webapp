@@ -398,11 +398,7 @@ export function App() {
       <img
         src={editedImage!}
         alt="Edited"
-        class={`
-          absolute inset-0 w-full h-full object-contain
-          transition-opacity duration-150
-          ${showOriginal ? "opacity-0" : "opacity-100"}
-        `}
+        class="absolute inset-0 w-full h-full object-contain"
         onContextMenu={preventImageContextMenu}
         draggable={false}
       />

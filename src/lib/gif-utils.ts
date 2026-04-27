@@ -6,6 +6,8 @@ export interface GifGenerationOptions {
   images: string[] // Array of image URLs
   maxSize?: number // Optional max dimension (width or height) - if not provided, uses original size
   delay: number // Delay between frames in ms
+  crossfadeFrames?: number // Number of generated blend frames between source images
+  crossfadeDelay?: number // Delay for each generated blend frame in ms
   loop: boolean // Whether to loop the GIF
   quality: number // 1-20, lower is better quality but slower
   onProgress?: (progress: number) => void
@@ -68,6 +70,27 @@ async function loadImageToCanvas(
 }
 
 /**
+ * Blend two prepared canvases into a new frame.
+ */
+function createCrossfadeFrame(
+  fromCanvas: HTMLCanvasElement,
+  toCanvas: HTMLCanvasElement,
+  progress: number
+): HTMLCanvasElement {
+  const canvas = document.createElement("canvas")
+  canvas.width = fromCanvas.width
+  canvas.height = fromCanvas.height
+  const ctx = canvas.getContext("2d")!
+
+  ctx.drawImage(fromCanvas, 0, 0)
+  ctx.globalAlpha = progress
+  ctx.drawImage(toCanvas, 0, 0)
+  ctx.globalAlpha = 1
+
+  return canvas
+}
+
+/**
  * Get image dimensions from URL
  */
 async function getImageDimensions(url: string): Promise<{ width: number; height: number }> {
@@ -83,7 +106,16 @@ async function getImageDimensions(url: string): Promise<{ width: number; height:
  * Generate an animated GIF from a sequence of images
  */
 export async function generateGif(options: GifGenerationOptions): Promise<Blob> {
-  const { images, maxSize, delay, loop, quality, onProgress } = options
+  const {
+    images,
+    maxSize,
+    delay,
+    crossfadeFrames = 0,
+    crossfadeDelay = delay,
+    loop,
+    quality,
+    onProgress,
+  } = options
   
   if (images.length === 0) {
     throw new Error("No images provided")
@@ -116,9 +148,20 @@ export async function generateGif(options: GifGenerationOptions): Promise<Blob> 
       repeat: loop ? 0 : -1, // 0 = loop forever, -1 = no loop
     })
     
-    // Add each frame
-    for (const canvas of canvases) {
-      gif.addFrame(canvas, { delay, copy: true })
+    // Hold each source image, then add generated blend frames toward the next image.
+    for (let i = 0; i < canvases.length; i++) {
+      gif.addFrame(canvases[i], { delay, copy: true })
+
+      const nextCanvas = canvases[i + 1] ?? (loop && canvases.length > 1 ? canvases[0] : undefined)
+      if (!nextCanvas || crossfadeFrames <= 0) continue
+
+      for (let frame = 1; frame <= crossfadeFrames; frame++) {
+        const progress = frame / (crossfadeFrames + 1)
+        gif.addFrame(createCrossfadeFrame(canvases[i], nextCanvas, progress), {
+          delay: crossfadeDelay,
+          copy: true,
+        })
+      }
     }
     
     gif.on("progress", (p: number) => {

@@ -32,6 +32,8 @@ export function GifEditor({ originalImage, editedImage, onBack }: GifEditorProps
   const [progress, setProgress] = useState(0)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [frameDelay, setFrameDelay] = useState(500) // ms between frames
+  const [crossfadeFrames, setCrossfadeFrames] = useState(6)
+  const [crossfadeDelay, setCrossfadeDelay] = useState(50)
   const [maxSize, setMaxSize] = useState<number | null>(null) // null = original size
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   
@@ -131,6 +133,8 @@ export function GifEditor({ originalImage, editedImage, onBack }: GifEditorProps
         images: images.map((img) => img.url),
         maxSize: maxSize ?? undefined,
         delay: frameDelay,
+        crossfadeFrames,
+        crossfadeDelay,
         loop: true,
         quality: 10,
         onProgress: setProgress,
@@ -148,7 +152,7 @@ export function GifEditor({ originalImage, editedImage, onBack }: GifEditorProps
     } finally {
       setGenerating(false)
     }
-  }, [images, frameDelay, previewUrl])
+  }, [images, frameDelay, crossfadeFrames, crossfadeDelay, maxSize, previewUrl])
 
   const handleDownload = useCallback(() => {
     if (!previewUrl) return
@@ -279,6 +283,45 @@ export function GifEditor({ originalImage, editedImage, onBack }: GifEditorProps
                 <span class="text-white text-sm w-16 text-right">{frameDelay}ms</span>
               </div>
             </label>
+
+            <label class="block">
+              <span class="text-gray-400 text-sm">Crossfade Smoothness</span>
+              <div class="flex items-center gap-3 mt-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="12"
+                  step="1"
+                  value={crossfadeFrames}
+                  onInput={(e) => setCrossfadeFrames(parseInt((e.target as HTMLInputElement).value))}
+                  class="flex-1 accent-blue-500"
+                />
+                <span class="text-white text-sm w-20 text-right">
+                  {crossfadeFrames === 0 ? "Off" : `${crossfadeFrames} frames`}
+                </span>
+              </div>
+              <p class="text-gray-500 text-xs mt-1">
+                Adds blended frames between each image instead of fading the whole GIF element.
+              </p>
+            </label>
+
+            {crossfadeFrames > 0 && (
+              <label class="block">
+                <span class="text-gray-400 text-sm">Crossfade Speed</span>
+                <div class="flex items-center gap-3 mt-2">
+                  <input
+                    type="range"
+                    min="20"
+                    max="150"
+                    step="10"
+                    value={crossfadeDelay}
+                    onInput={(e) => setCrossfadeDelay(parseInt((e.target as HTMLInputElement).value))}
+                    class="flex-1 accent-blue-500"
+                  />
+                  <span class="text-white text-sm w-16 text-right">{crossfadeDelay}ms</span>
+                </div>
+              </label>
+            )}
             
             <label class="block">
               <span class="text-gray-400 text-sm">Max Size</span>
