@@ -17,6 +17,7 @@ export function App() {
   const bothInputRef = useRef<HTMLInputElement>(null)
   const originalInputRef = useRef<HTMLInputElement>(null)
   const editedInputRef = useRef<HTMLInputElement>(null)
+  const holdTimerRef = useRef<number | null>(null)
 
   // Cleanup URLs on unmount
   useEffect(() => {
@@ -125,11 +126,29 @@ export function App() {
 
   // Touch/Mouse handlers for comparison view
   const handlePointerDown = useCallback(() => {
-    setShowOriginal(true)
+    if (holdTimerRef.current !== null) {
+      window.clearTimeout(holdTimerRef.current)
+    }
+    holdTimerRef.current = window.setTimeout(() => {
+      setShowOriginal(true)
+      holdTimerRef.current = null
+    }, 120)
   }, [])
 
   const handlePointerUp = useCallback(() => {
+    if (holdTimerRef.current !== null) {
+      window.clearTimeout(holdTimerRef.current)
+      holdTimerRef.current = null
+    }
     setShowOriginal(false)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (holdTimerRef.current !== null) {
+        window.clearTimeout(holdTimerRef.current)
+      }
+    }
   }, [])
 
   // GIF Editor Screen
